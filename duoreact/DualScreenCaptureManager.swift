@@ -1,3 +1,11 @@
+//
+//  DualScreenCaptureManager.swift
+//  duoreact
+//
+//  Created by Jackson Rakena on 25/10/2026.
+//
+
+
 import AVFoundation
 import Observation
 
@@ -6,7 +14,7 @@ class DualScreenCaptureManager {
     var isSessionRunning = false
     var permissionStatus: AVAuthorizationStatus = .notDetermined
     
-    private let captureSession = AVCaptureSession()
+    let captureSession = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "com.app.dualscreen.captureQueue")
     
     init() {
@@ -73,3 +81,4 @@ class DualScreenCaptureManager {
         }
     }
 }
+
