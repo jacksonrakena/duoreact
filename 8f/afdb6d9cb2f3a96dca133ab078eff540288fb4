@@ -1,0 +1,36 @@
+duoreact/Info.plist
+  h_6a707fe7ab094c 1-5
+.gitignore
+  h_6a707fe7ab094c 1-63
+duoreact.xcodeproj/project.pbxproj
+  h_6a707fe7ab094c 13-22,26-28,270-271,273-280,283-286,297,323-324,326-333,336-339,350
+duoreact.xcodeproj/xcuserdata/jackson.xcuserdatad/xcschemes/xcschememanagement.plist
+  h_6a707fe7ab094c 12-16
+duoreact/AnimatedImageView.swift
+  h_6a707fe7ab094c 1-146
+duoreact/ContentView.swift
+  h_6a707fe7ab094c 2-3,6-59,61-68,70-304,306-317,319-320,322-331,333-339,341-387,391-457,461-500,502,506-528,531-550
+duoreact/DualScreenCaptureManager.swift
+  h_6a707fe7ab094c 1-8,17,84
+duoreact/ImageCache.swift
+  h_6a707fe7ab094c 1-125
+duoreact/MyApp.swift
+  h_6a707fe7ab094c 4-10
+duoreact/ReactionItem.swift
+  h_6a707fe7ab094c 1-105
+duoreact/SoundManager.swift
+  h_6a707fe7ab094c 1-97
+duoreact/VideoPlayerView.swift
+  h_6a707fe7ab094c 1-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8fafdb6d9cb2f3a96dca133ab078eff540288fb4",
+  "prompts": {},
+  "humans": {
+    "h_6a707fe7ab094c": {
+      "author": "jacksonrakena <jackson@rakena.co.nz>"
+    }
+  }
+}
