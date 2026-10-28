@@ -1,0 +1,30 @@
+duoreact/AddReactionView.swift
+  h_6a707fe7ab094c 1-326
+duoreact/AnimatedImageView.swift
+  h_6a707fe7ab094c 63
+duoreact/ContentView.swift
+  h_6a707fe7ab094c 64-65,208,220-228,230-255,261-263,422-431
+duoreact/ImageCache.swift
+  h_6a707fe7ab094c 3,35-37,42-77
+duoreact/MyApp.swift
+  h_6a707fe7ab094c 5-8
+duoreact/ReactionItem.swift
+  h_6a707fe7ab094c 3,7-43,46-47,53-66,87-109,112-113
+duoreact/ReactionStore.swift
+  h_6a707fe7ab094c 1-106
+duoreact/SoundManager.swift
+  h_6a707fe7ab094c 22-25,27,32-57,69,88,93-94
+duoreact/VideoPlayerView.swift
+  h_6a707fe7ab094c 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "56d194d7a9fe6a7aba8ee69bc88e1b4e0376840d",
+  "prompts": {},
+  "humans": {
+    "h_6a707fe7ab094c": {
+      "author": "jacksonrakena <jackson@rakena.co.nz>"
+    }
+  }
+}
