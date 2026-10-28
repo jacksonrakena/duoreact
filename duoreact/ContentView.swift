@@ -61,6 +61,8 @@ struct ContentView: View {
     @State private var captureManager = DualScreenCaptureManager()
     @State private var outerContent: OuterContent = .none
     @State private var selectedTab = 0
+    @State private var reactionStore = ReactionStore.shared
+    @State private var showAddReaction = false
     
     // Text mode state
     @State private var customText = ""
@@ -203,7 +205,7 @@ struct ContentView: View {
         
         return ScrollView {
             LazyVGrid(columns: columns, spacing: 14) {
-                ForEach(allReactions) { reaction in
+                ForEach(reactionStore.allItems) { reaction in
                     let isSelected: Bool = {
                         if case .reaction(let r) = outerContent { return r.id == reaction.id }
                         return false
@@ -215,11 +217,49 @@ struct ContentView: View {
                     ) {
                         triggerReaction(reaction)
                     }
+                    .contextMenu {
+                        if reaction.isCustom {
+                            Button(role: .destructive) {
+                                deleteReaction(reaction)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
                 }
+                
+                // Add button
+                Button {
+                    showAddReaction = true
+                } label: {
+                    VStack(spacing: 8) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color(.tertiarySystemBackground))
+                                .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
+                                .foregroundStyle(.secondary.opacity(0.4))
+                            
+                            Image(systemName: "plus")
+                                .font(.largeTitle)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(height: 130)
+                        
+                        Text("Add New")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(10)
+                }
+                .buttonStyle(BounceButtonStyle())
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 24)
+        }
+        .sheet(isPresented: $showAddReaction) {
+            AddReactionView(store: reactionStore)
         }
     }
     
@@ -377,6 +417,16 @@ struct ContentView: View {
             outerContent = .reaction(reaction)
         }
         SoundManager.shared.play(reaction.sound)
+    }
+    
+    private func deleteReaction(_ reaction: ReactionItem) {
+        // Clear outer display if showing this reaction
+        if case .reaction(let r) = outerContent, r.id == reaction.id {
+            outerContent = .none
+        }
+        ImageCache.shared.evict(reaction)
+        SoundManager.shared.evict(reaction)
+        reactionStore.delete(reaction)
     }
     
     private func sendText() {

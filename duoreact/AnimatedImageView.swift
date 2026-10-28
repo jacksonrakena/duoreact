@@ -60,10 +60,7 @@ struct AnimatedImageView: UIViewRepresentable {
         
         // Not cached yet — check directly by key
         // Fall back to on-demand decode on background thread
-        let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension, subdirectory: "Reactions")
-            ?? Bundle.main.url(forResource: fileName, withExtension: fileExtension)
-        
-        guard let url = url else { return }
+        guard let url = ReactionItem.resolveFileURL(fileName: fileName, fileExtension: fileExtension) else { return }
         
         let coordinator = context.coordinator
         DispatchQueue.global(qos: .userInitiated).async {

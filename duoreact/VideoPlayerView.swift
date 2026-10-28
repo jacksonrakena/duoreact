@@ -18,8 +18,7 @@ class LoopingPlayerUIView: UIView {
     func loadVideo(fileName: String, fileExtension: String, videoGravity: AVLayerVideoGravity) {
         cleanup()
         
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension, subdirectory: "Reactions")
-                ?? Bundle.main.url(forResource: fileName, withExtension: fileExtension) else {
+        guard let url = ReactionItem.resolveFileURL(fileName: fileName, fileExtension: fileExtension) else {
             return
         }
         

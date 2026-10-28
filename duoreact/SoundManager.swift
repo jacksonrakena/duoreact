@@ -9,7 +9,6 @@ class SoundManager {
     private var preloadedPlayers: [String: AVAudioPlayer] = [:]
     
     private init() {
-        // Move AVAudioSession setup off the main thread to avoid UI unresponsiveness warning
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
@@ -20,19 +19,39 @@ class SoundManager {
         }
     }
     
-    /// Preload all custom audio files from reactions so playback is instant
-    func preloadAll() {
-        for reaction in allReactions {
+    /// Preload all custom audio files so playback is instant
+    func preloadAll(items: [ReactionItem]? = nil) {
+        let reactions = items ?? allReactions
+        for reaction in reactions {
             if case .custom(let fileName, let fileExtension) = reaction.sound {
-                let key = "\(fileName).\(fileExtension)"
-                let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension, subdirectory: "Reactions")
-                    ?? Bundle.main.url(forResource: fileName, withExtension: fileExtension)
-                
-                if let url = url, let player = try? AVAudioPlayer(contentsOf: url) {
-                    player.prepareToPlay()
-                    preloadedPlayers[key] = player
-                }
+                preloadSound(fileName: fileName, fileExtension: fileExtension)
             }
+        }
+    }
+    
+    /// Preload a single newly-added reaction's sound
+    func preloadOne(_ reaction: ReactionItem) {
+        if case .custom(let fileName, let fileExtension) = reaction.sound {
+            preloadSound(fileName: fileName, fileExtension: fileExtension)
+        }
+    }
+    
+    /// Remove a preloaded sound (when a custom reaction is deleted)
+    func evict(_ reaction: ReactionItem) {
+        if case .custom(let fileName, let fileExtension) = reaction.sound {
+            let key = "\(fileName).\(fileExtension)"
+            preloadedPlayers.removeValue(forKey: key)
+        }
+    }
+    
+    private func preloadSound(fileName: String, fileExtension: String) {
+        let key = "\(fileName).\(fileExtension)"
+        guard preloadedPlayers[key] == nil else { return }
+        
+        if let url = ReactionItem.resolveFileURL(fileName: fileName, fileExtension: fileExtension),
+           let player = try? AVAudioPlayer(contentsOf: url) {
+            player.prepareToPlay()
+            preloadedPlayers[key] = player
         }
     }
     
@@ -47,7 +66,7 @@ class SoundManager {
         }
     }
     
-    /// Play a sound based on the SoundType, cancelling any currently playing sound first
+    /// Play a sound, cancelling any currently playing sound first
     func play(_ sound: SoundType) {
         stopAll()
         
@@ -65,19 +84,14 @@ class SoundManager {
     private func playBundledAudio(fileName: String, fileExtension: String) {
         let key = "\(fileName).\(fileExtension)"
         
-        // Use preloaded player if available
         if let player = preloadedPlayers[key] {
-            player.currentTime = 0 // Rewind so it plays from the start
+            player.currentTime = 0
             player.play()
             return
         }
         
-        // Fallback: load on demand
-        let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension, subdirectory: "Reactions")
-            ?? Bundle.main.url(forResource: fileName, withExtension: fileExtension)
-        
-        guard let url = url else {
-            print("Could not find \(key) in bundle")
+        guard let url = ReactionItem.resolveFileURL(fileName: fileName, fileExtension: fileExtension) else {
+            print("Could not find \(key)")
             return
         }
         

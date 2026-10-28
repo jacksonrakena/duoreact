@@ -1,6 +1,6 @@
 import UIKit
-import AVFoundation
 import ImageIO
+import AVFoundation
 import Observation
 
 /// Cached result for a decoded image (static or animated)
@@ -13,8 +13,6 @@ struct CachedImage {
 }
 
 /// Preloads and caches all reaction images in the background.
-/// GIF frames are decoded once and kept in memory so tapping a
-/// reaction is instant.
 @Observable
 class ImageCache {
     static let shared = ImageCache()
@@ -26,47 +24,57 @@ class ImageCache {
     
     private init() {}
     
-    /// Whether a specific reaction's image is ready
     func isLoaded(_ reaction: ReactionItem) -> Bool {
         cache[reaction.fullFileName] != nil
     }
     
-    /// Get the cached image for a reaction (nil if not yet decoded)
     func get(_ reaction: ReactionItem) -> CachedImage? {
         cache[reaction.fullFileName]
     }
     
-    /// Preload all reactions. Call once at app launch.
-    func preloadAll() {
-        let reactions = allReactions
+    /// Preload a list of reactions. Call once at app launch.
+    func preloadAll(items: [ReactionItem]? = nil) {
+        let reactions = items ?? allReactions
         totalCount = reactions.count
         loadedCount = 0
         
         for reaction in reactions {
-            queue.async { [weak self] in
-                let key = reaction.fullFileName
-                
-                // Skip if already cached
-                if self?.cache[key] != nil { return }
-                
-                let url = Bundle.main.url(forResource: reaction.fileName, withExtension: reaction.fileExtension, subdirectory: "Reactions")
-                    ?? Bundle.main.url(forResource: reaction.fileName, withExtension: reaction.fileExtension)
-                
-                guard let url = url else { return }
-                
-                let cached: CachedImage
-                if reaction.isVideo {
-                    cached = Self.generateVideoThumbnail(from: url)
-                } else if reaction.fileExtension == "gif" {
-                    cached = Self.decodeGIF(from: url)
-                } else {
-                    cached = Self.decodeStatic(from: url)
-                }
-                
-                DispatchQueue.main.async {
-                    self?.cache[key] = cached
-                    self?.loadedCount += 1
-                }
+            decodeInBackground(reaction)
+        }
+    }
+    
+    /// Preload a single newly-added reaction
+    func preloadOne(_ reaction: ReactionItem) {
+        totalCount += 1
+        decodeInBackground(reaction)
+    }
+    
+    /// Remove a cached entry (when a custom reaction is deleted)
+    func evict(_ reaction: ReactionItem) {
+        cache.removeValue(forKey: reaction.fullFileName)
+    }
+    
+    private func decodeInBackground(_ reaction: ReactionItem) {
+        queue.async { [weak self] in
+            let key = reaction.fullFileName
+            if self?.cache[key] != nil { return }
+            
+            guard let url = ReactionItem.resolveFileURL(
+                fileName: reaction.fileName, fileExtension: reaction.fileExtension
+            ) else { return }
+            
+            let cached: CachedImage
+            if reaction.isVideo {
+                cached = Self.generateVideoThumbnail(from: url)
+            } else if reaction.fileExtension == "gif" {
+                cached = Self.decodeGIF(from: url)
+            } else {
+                cached = Self.decodeStatic(from: url)
+            }
+            
+            DispatchQueue.main.async {
+                self?.cache[key] = cached
+                self?.loadedCount += 1
             }
         }
     }
